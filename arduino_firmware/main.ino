@@ -26,7 +26,7 @@
 
 LIDARLite myLidarLite;
 
-boolean EMERGENCY_STOP = false;
+int EMERGENCY_STOP = 0;
 boolean in_motion = false;
 int DISTANCE = 0;
 int min_position = 10;
@@ -35,7 +35,20 @@ int max_position = 300;
 void setup()
 {
   Serial.begin(9600); // Initialize serial connection to display distance readings
-
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB
+  }
+  Serial.println("Welcome");
+  Serial.println("Boad Rate: 9600");
+  Serial.println("Trolley...");
+  Serial.println("  Min Position: 10");
+  Serial.println("  Max Position: 300");
+  Serial.println("Winch...");
+  Serial.println("  Min Position: 10");
+  Serial.println("  Max Position: 300");
+  Serial.println("Serial Operation");
+  Serial.println("ONLY THE TROLLEY IS WORKING SO FAR");
+  Serial.println("Send in integerer value between the Min and Max");
   /*
     begin(int configuration, bool fasti2c, char lidarliteAddress)
 
@@ -90,6 +103,9 @@ void loop()
     Serial.println(pulley_destination);
     if (!in_motion) {
       seek_position(pulley_destination);
+      if (EMERGENCY_STOP == 22222) {
+        Serial.println("EMERGENCY_STOP");
+      }
     }
   }
 }
@@ -122,6 +138,10 @@ void seek_position(int to_position) {
   while (!complete) {
     DISTANCE = myLidarLite.distance();
     Serial.println(DISTANCE);
+    EMERGENCY_STOP = Serial.parseInt();
+    if (EMERGENCY_STOP == 22222) {
+      break;
+    }
     // Take 99 measurements without receiver bias correction
     for(int i = 0; i < 99; i++)
     {
